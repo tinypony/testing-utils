@@ -4,13 +4,6 @@ import random
 import argparse
 from time import time, sleep
 
-def generate_influxdb_data(args):
-	retval = []
-	for n in range(args.number):
-		data_point = 'latency,cluster={},multistack={},rate={}'.format(args.cluster_size, args.multistack, args.rate)
-		retval.append(data_point)
-	return retval
-
 class TokenBucket(object):
 	"""An implementation of the token bucket algorithm.
 	>>> bucket = TokenBucket(80, 0.5)
@@ -83,7 +76,7 @@ class InfiniteTokenBucket(object):
 		return float('infinity')
 
 
-def rate_limit(data, bandwidth_or_burst, steady_state_bandwidth=None):
+def rate_limit(args, bandwidth_or_burst, steady_state_bandwidth=None):
 	"""Limit the bandwidth of a generator.
 	Given a data generator, return a generator that yields the data at no
 	higher than the specified bandwidth.  For example, ``rate_limit(data, _256k)``
@@ -96,23 +89,26 @@ def rate_limit(data, bandwidth_or_burst, steady_state_bandwidth=None):
 	bandwidth = steady_state_bandwidth or bandwidth_or_burst
 	rate_limiter = TokenBucket(bandwidth_or_burst, bandwidth)
 
-	for thing in data:
-		rate_limiter.consume(len(str(thing)))
-		yield thing
+	for n in range(args.number):
+		data_point = 'latency,cluster={},multistack={},direct={},rate={} sentat=0000000000000'.format(args.cluster_size, args.multistack, args.direct, args.rate)
+		rate_limiter.consume(len(data_point))
+		yield data_point
 
 
 parser = argparse.ArgumentParser(description='Starts generating dumb metrics and sending them to monitoring client at given rate')
-parser.add_argument('--cluster-size', required=True, dest='cluster_size', type=int, help='The number of kafka brokers in datasink')
+parser.add_argument('--cluster-size', dest='cluster_size', type=int, help='The number of kafka brokers in datasink')
 parser.add_argument('--multistack', dest='multistack', help='Flag to indicate if testing bridged cloud installation')
 parser.add_argument('--rate', required=True, dest='rate', type=float, help='Transmission rate of metrics in kBs')
-parser.add_argument('--number', required=True, dest='number', type=int, help='The amount of metrics to generate')
+parser.add_argument('--number', dest='number', type=int, help='The amount of metrics to generate')
 parser.add_argument('--direct', dest='direct', help='Indicates if messages are send directly to the consumer or through ANDy framework')
 parser.add_argument('--ip', dest='ip', type=str, help='The IP of the receiving endpoint')
 parser.add_argument('--port', dest='port', type=int, help='The port of the receiving endpoint')
+parser.set_defaults(cluster_size=1)
 parser.set_defaults(multistack=False)
 parser.set_defaults(direct=False)
 parser.set_defaults(ip='127.0.0.1')
 parser.set_defaults(port=9876)
+parser.set_defaults(number=100)
 
 args = parser.parse_args()
 
@@ -120,8 +116,15 @@ required_byte_rate = args.rate * 1024
 HOST, PORT = args.ip, args.port
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-data = generate_influxdb_data(args)
-for dp in rate_limit(data, required_byte_rate):
+start_time = time()
+bytes_sent = 0
+
+for dp in rate_limit(args, required_byte_rate):
 	millis = int(round(time() * 1000))
-	payload = dp + ' sentat={}'.format(millis)
+	payload = dp.replace('sentat=0000000000000', 'sentat={}'.format(millis))
 	sock.sendto(payload, (HOST, PORT))
+	bytes_sent += len(payload)
+
+end_time = time()
+time_total = end_time - start_time
+print 'Sent {} bytes in {} second, which translates to {} kBps rate'.format(bytes_sent, time_total, (bytes_sent/1024)/time_total)
