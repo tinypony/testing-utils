@@ -90,7 +90,7 @@ def rate_limit(args, bandwidth_or_burst, steady_state_bandwidth=None):
 	rate_limiter = TokenBucket(bandwidth_or_burst, bandwidth)
 
 	for n in range(args.number):
-		data_point = 'latency,cluster={},multistack={},direct={},rate={} sentat=0000000000000'.format(args.cluster_size, args.multistack, args.direct, args.rate)
+		data_point = 'latency,id={},cluster={},multistack={},direct={},rate={} sentat=0000000000000'.format(n, args.cluster_size, args.multistack, args.direct, args.rate)
 		rate_limiter.consume(len(data_point))
 		yield data_point
 
