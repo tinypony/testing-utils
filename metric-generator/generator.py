@@ -4,7 +4,6 @@ import random
 import argparse
 from time import time, sleep
 
-
 def generate_influxdb_data(args):
 	retval = []
 	for n in range(args.number):
@@ -107,12 +106,18 @@ parser.add_argument('--cluster-size', required=True, dest='cluster_size', type=i
 parser.add_argument('--multistack', dest='multistack', help='Flag to indicate if testing bridged cloud installation')
 parser.add_argument('--rate', required=True, dest='rate', type=float, help='Transmission rate of metrics in kBs')
 parser.add_argument('--number', required=True, dest='number', type=int, help='The amount of metrics to generate')
+parser.add_argument('--direct', dest='direct', help='Indicates if messages are send directly to the consumer or through ANDy framework')
+parser.add_argument('--ip', dest='ip', type=str, help='The IP of the receiving endpoint')
+parser.add_argument('--port', dest='port', type=int, help='The port of the receiving endpoint')
 parser.set_defaults(multistack=False)
+parser.set_defaults(direct=False)
+parser.set_defaults(ip='127.0.0.1')
+parser.set_defaults(port=9876)
 
 args = parser.parse_args()
 
 required_byte_rate = args.rate * 1024
-HOST, PORT = "127.0.0.1", 9876
+HOST, PORT = args.ip, args.port
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 data = generate_influxdb_data(args)
