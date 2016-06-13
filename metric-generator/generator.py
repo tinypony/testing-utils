@@ -123,7 +123,6 @@ for dp in rate_limit(args, required_byte_rate):
 	millis = int(round(time() * 1000))
 	payload = dp.replace('sentat=0000000000000', 'sentat={}'.format(millis))
 	sock.sendto(payload, (HOST, PORT))
-	print 'Generated: {}'.format(counter)
 	counter += 1
 	bytes_sent += len(payload)
 
