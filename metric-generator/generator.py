@@ -114,8 +114,12 @@ args = parser.parse_args()
 
 required_byte_rate = args.rate * 1024
 HOST, PORT = args.ip, args.port
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect((HOST, PORT))
+
+if(not args.direct):
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((HOST, PORT))
+else 
+	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 start_time = time()
 bytes_sent = 0
@@ -125,7 +129,12 @@ messages_sent = 0
 for dp in rate_limit(args, required_byte_rate/32, required_byte_rate):
 	millis = int(round(time() * 1000))
 	payload = dp.replace('sentat=0000000000000', 'sentat={}\n'.format(millis))
-	bytes_sent += sock.send(payload)
+
+	if(args.direct):
+		bytes_sent += sock.send(payload)
+	else:
+		bytes_sent += sock.sendto(payload, (HOST, PORT))
+	
 	messages_sent += 1
 
 
