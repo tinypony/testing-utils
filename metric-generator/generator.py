@@ -103,11 +103,13 @@ parser.add_argument('--number', dest='number', type=int, help='The amount of met
 parser.add_argument('--direct', dest='direct', help='Indicates if messages are send directly to the consumer or through ANDy framework')
 parser.add_argument('--ip', dest='ip', type=str, help='The IP of the receiving endpoint')
 parser.add_argument('--port', dest='port', type=int, help='The port of the receiving endpoint')
+parser.add_argument('--protocol', dest='protocol', type=str, help='Protocol used to send data to the local port. tcp or udp')
 parser.set_defaults(cluster_size=1)
 parser.set_defaults(multistack=False)
 parser.set_defaults(direct=False)
 parser.set_defaults(ip='127.0.0.1')
 parser.set_defaults(port=9876)
+parser.set_defaults(protocol='tcp')
 parser.set_defaults(number=100)
 
 args = parser.parse_args()
@@ -115,10 +117,10 @@ args = parser.parse_args()
 required_byte_rate = args.rate * 1024
 HOST, PORT = args.ip, args.port
 
-if(not args.direct):
+if args.protocol === 'tcp':
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((HOST, PORT))
-else:
+elif args.protocol === 'udp':
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 start_time = time()
@@ -130,11 +132,11 @@ for dp in rate_limit(args, required_byte_rate/32, required_byte_rate):
 	millis = int(round(time() * 1000))
 	payload = dp.replace('sentat=0000000000000', 'sentat={}\n'.format(millis))
 
-	if(not args.direct):
+	if args.protocol === 'tcp':
 		bytes_sent += sock.send(payload)
-	else:
+	elif args.protocol === 'udp':
 		bytes_sent += sock.sendto(payload, (HOST, PORT))
-	
+
 	messages_sent += 1
 
 
