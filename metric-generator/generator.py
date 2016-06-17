@@ -114,7 +114,7 @@ args = parser.parse_args()
 
 required_byte_rate = args.rate * 1024
 HOST, PORT = args.ip, args.port
-sock = socket.socket(socket.AF_INET, socket.SOCK_SOCK_STREAM)
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect((HOST, PORT))
 
 start_time = time()
