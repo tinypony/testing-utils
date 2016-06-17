@@ -132,3 +132,5 @@ end_time = time()
 time_total = end_time - start_time
 print 'Messages sent {}'.format(messages_sent)
 print 'Sent {} bytes in {} second, which translates to {} kBps rate'.format(bytes_sent, time_total, (bytes_sent/1024)/time_total)
+sock.shutdown();
+sock.close();
