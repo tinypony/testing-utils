@@ -121,9 +121,10 @@ start_time = time()
 bytes_sent = 0
 messages_sent = 0
 
+
 for dp in rate_limit(args, required_byte_rate):
 	millis = int(round(time() * 1000))
-	payload = dp.replace('sentat=0000000000000', 'sentat={}'.format(millis))
+	payload = dp.replace('sentat=0000000000000', 'sentat={}\n'.format(millis))
 	bytes_sent += sock.send(payload)
 	messages_sent += 1
 
