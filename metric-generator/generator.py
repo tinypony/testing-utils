@@ -114,18 +114,21 @@ args = parser.parse_args()
 
 required_byte_rate = args.rate * 1024
 HOST, PORT = args.ip, args.port
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock = socket.socket(socket.AF_INET, socket.SOCK_SOCK_STREAM)
+sock.connect((HOST, PORT))
 
 start_time = time()
 bytes_sent = 0
-counter = 0
+messages_sent = 0
+
 for dp in rate_limit(args, required_byte_rate):
 	millis = int(round(time() * 1000))
 	payload = dp.replace('sentat=0000000000000', 'sentat={}'.format(millis))
-	sock.sendto(payload, (HOST, PORT))
-	counter += 1
-	bytes_sent += len(payload)
+	bytes_sent += sock.send(payload)
+	messages_sent += 1
+
 
 end_time = time()
 time_total = end_time - start_time
+print 'Messages sent {}'.format(messages_sent)
 print 'Sent {} bytes in {} second, which translates to {} kBps rate'.format(bytes_sent, time_total, (bytes_sent/1024)/time_total)
