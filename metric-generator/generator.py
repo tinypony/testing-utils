@@ -117,10 +117,10 @@ args = parser.parse_args()
 required_byte_rate = args.rate * 1024
 HOST, PORT = args.ip, args.port
 
-if args.protocol === 'tcp':
+if args.protocol == 'tcp':
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((HOST, PORT))
-elif args.protocol === 'udp':
+elif args.protocol == 'udp':
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 start_time = time()
@@ -132,9 +132,9 @@ for dp in rate_limit(args, required_byte_rate/32, required_byte_rate):
 	millis = int(round(time() * 1000))
 	payload = dp.replace('sentat=0000000000000', 'sentat={}\n'.format(millis))
 
-	if args.protocol === 'tcp':
+	if args.protocol == 'tcp':
 		bytes_sent += sock.send(payload)
-	elif args.protocol === 'udp':
+	elif args.protocol == 'udp':
 		bytes_sent += sock.sendto(payload, (HOST, PORT))
 
 	messages_sent += 1
