@@ -118,7 +118,7 @@ HOST, PORT = args.ip, args.port
 if(not args.direct):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.connect((HOST, PORT))
-else 
+else:
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 start_time = time()
