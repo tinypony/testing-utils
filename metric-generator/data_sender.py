@@ -3,7 +3,7 @@ import sys
 import random 
 import argparse
 
-PORT =  1447
+PORT=1447
 
 parser = argparse.ArgumentParser(description='Send sub info to classifier')
 parser.add_argument('--data', dest='data', required=True, type=str, help='Path to csv data')
