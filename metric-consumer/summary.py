@@ -18,8 +18,8 @@ def print_file_summary(path):
 			try:
 				values = line.split(',')
 				#latency,1467792005016000000,3,False,338,False,256.0,1.467791983851e+12
-				receive_time = int(values[1])
-				send_time = int(float(values[7]))
+				receive_time = float(values[1])
+				send_time = float(values[7])
 				receive_time = receive_time/1000000 #convert from nanoseconds
 				travel_time = receive_time - send_time
 				cma = cumulative_moving_average(travel_time, cma, n+1)
