@@ -132,7 +132,7 @@ def send_unbound(args, sock):
 	start_time = time()
 
 	while running:
-		data_point = 'latency,id={},cluster={},multistack={},direct={},rate={} sentat={}'.format(n, args.cluster_size, args.multistack, args.direct, args.rate, int(round(time() * 1000))
+		data_point = 'latency,id={},cluster={},multistack={},direct={},rate={} sentat={}'.format(n, args.cluster_size, args.multistack, args.direct, args.rate, int(round(time() * 1000)) )
 		n += 1
 		if args.protocol == 'tcp':
 			sock.send(data_point)
