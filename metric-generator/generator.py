@@ -126,21 +126,22 @@ if args.protocol == 'tcp':
 elif args.protocol == 'udp':
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-def finish():
-	running = False
-
 def send_unbound(args, sock):
-	r = Timer(61.0, finish)
-	r.start()
 	n = 0
+	running = True
+	start_time = time()
+
 	while running:
-		millis = int(round(time() * 1000))
-		data_point = 'latency,id={},cluster={},multistack={},direct={},rate={} sentat={}'.format(n, args.cluster_size, args.multistack, args.direct, args.rate, millis)
+		data_point = 'latency,id={},cluster={},multistack={},direct={},rate={} sentat={}'.format(n, args.cluster_size, args.multistack, args.direct, args.rate, int(round(time() * 1000))
 		n += 1
 		if args.protocol == 'tcp':
 			sock.send(data_point)
 		elif args.protocol == 'udp':
 			sock.sendto(data_point, (HOST, PORT))
+
+		if(time() - start_time > 61): #run for one minute
+			running = False
+
 
 	print 'I am done!'
 	sock.close();
