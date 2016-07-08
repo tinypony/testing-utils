@@ -23,6 +23,7 @@ class ThroughputCalculator {
 	}
 
 	update(data) {
+		console.log('.');
 		if(!this.startingTime) {
 			this.startingTime = Date.now();
 			setTimeout(this.finish.bind(this), this.measurePeriod);
