@@ -59,6 +59,7 @@ var ThroughputCalculator = function () {
 			var totalTimeS = totalTime / 1000.0;
 			var bitsReceived = this.totalBytesReceived * 8;
 			var megabitsReceived = bitsReceived / mega;
+			console.log('Received ' + this.totalBytesReceived / 1000000.0 + ' megabytes');
 			console.log('Received ' + megabitsReceived + ' megabits in ' + totalTimeS + ' seconds. This translates to ' + megabitsReceived / totalTimeS + ' Mbit/s');
 		}
 	}]);
