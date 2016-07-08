@@ -40,7 +40,7 @@ class ThroughputCalculator {
 	finish() {
 		this.sock.close();
 		const totalTime = this.endingTime - this.startingTime;
-		const totalTimeS = totalTime / 1000;
+		const totalTimeS = totalTime / 1000.0;
 		const bitsReceived = this.totalBytesReceived * 8;
 		const megabitsReceived = bitsReceived / mega;
 		console.log(`Received ${megabitsReceived} megabits in ${totalTimeS} seconds. This translates to ${megabitsReceived / totalTimeS} Mbit/s`);

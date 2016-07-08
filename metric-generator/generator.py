@@ -167,8 +167,10 @@ def send_with_rate_limit(args, sock):
 
 	end_time = time()
 	time_total = end_time - start_time
+	kBps = (bytes_sent/1000)/time_total
+	Mbps = ((bytes_sent/1000000.0) * 8) / time_total
 	print 'Messages sent {}'.format(messages_sent)
-	print 'Sent {} bytes in {} second, which translates to {} kBps rate'.format(bytes_sent, time_total, (bytes_sent/1024)/time_total)
+	print 'Sent {} bytes in {} second, which translates to {} kBps ({} Mbps) rate'.format(bytes_sent, time_total, kBps, Mbps)
 	sock.close();
 
 if args.unbound:
