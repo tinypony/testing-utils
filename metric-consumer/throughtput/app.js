@@ -38,8 +38,9 @@ var ThroughputCalculator = function () {
 	}, {
 		key: 'update',
 		value: function update(data) {
-			console.log('.');
 			if (!this.startingTime) {
+				console.log('Start measurements');
+
 				this.startingTime = Date.now();
 				setTimeout(this.finish.bind(this), this.measurePeriod);
 			} else {
