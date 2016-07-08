@@ -3,6 +3,7 @@ import sys
 import random 
 import argparse
 from time import time, sleep
+from threading import Timer
 
 class TokenBucket(object):
 	"""An implementation of the token bucket algorithm.
@@ -98,23 +99,25 @@ def rate_limit(args, bandwidth_or_burst, steady_state_bandwidth=None):
 parser = argparse.ArgumentParser(description='Starts generating dumb metrics and sending them to monitoring client at given rate')
 parser.add_argument('--cluster-size', dest='cluster_size', type=int, help='The number of kafka brokers in datasink')
 parser.add_argument('--multistack', dest='multistack', help='Flag to indicate if testing bridged cloud installation')
-parser.add_argument('--rate', required=True, dest='rate', type=float, help='Transmission rate of metrics in kBs')
+parser.add_argument('--rate', dest='rate', type=float, help='Transmission rate of metrics in kBs')
 parser.add_argument('--number', dest='number', type=int, help='The amount of metrics to generate')
 parser.add_argument('--direct', dest='direct', help='Indicates if messages are send directly to the consumer or through ANDy framework')
+parser.add_argument('--unbound', dest='unbound', help='Indicates if messages are send constantly with no rate limiting')
 parser.add_argument('--ip', dest='ip', type=str, help='The IP of the receiving endpoint')
 parser.add_argument('--port', dest='port', type=int, help='The port of the receiving endpoint')
 parser.add_argument('--protocol', dest='protocol', type=str, help='Protocol used to send data to the local port. tcp or udp')
 parser.set_defaults(cluster_size=1)
 parser.set_defaults(multistack=False)
 parser.set_defaults(direct=False)
+parser.set_defaults(rate=256.0)
 parser.set_defaults(ip='127.0.0.1')
 parser.set_defaults(port=9876)
 parser.set_defaults(protocol='tcp')
 parser.set_defaults(number=100)
+parser.set_defaults(unbound=False)
 
 args = parser.parse_args()
-
-required_byte_rate = args.rate * 1024
+running = True
 HOST, PORT = args.ip, args.port
 
 if args.protocol == 'tcp':
@@ -123,25 +126,51 @@ if args.protocol == 'tcp':
 elif args.protocol == 'udp':
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-start_time = time()
-bytes_sent = 0
-messages_sent = 0
+def finish():
+	running = False
+
+def send_unbound(args, sock):
+	r = Timer(61.0, finish)
+	r.start()
+
+	while running:
+		millis = int(round(time() * 1000))
+		data_point = 'latency,id={},cluster={},multistack={},direct={},rate={} sentat={}'.format(n, args.cluster_size, args.multistack, args.direct, args.rate, millis)
+		
+		if args.protocol == 'tcp':
+			bytes_sent += sock.send(payload)
+		elif args.protocol == 'udp':
+			bytes_sent += sock.sendto(payload, (HOST, PORT))
+
+	print 'I am done!'
+	sock.close();
 
 
-for dp in rate_limit(args, required_byte_rate/32, required_byte_rate):
-	millis = int(round(time() * 1000))
-	payload = dp.replace('sentat=0000000000000', 'sentat={}\n'.format(millis))
+def send_with_rate_limit(args, sock):
+	required_byte_rate = args.rate * 1024
+	start_time = time()
+	bytes_sent = 0
+	messages_sent = 0
 
-	if args.protocol == 'tcp':
-		bytes_sent += sock.send(payload)
-	elif args.protocol == 'udp':
-		bytes_sent += sock.sendto(payload, (HOST, PORT))
+	for dp in rate_limit(args, required_byte_rate/32, required_byte_rate):
+		millis = int(round(time() * 1000))
+		payload = dp.replace('sentat=0000000000000', 'sentat={}\n'.format(millis))
 
-	messages_sent += 1
+		if args.protocol == 'tcp':
+			bytes_sent += sock.send(payload)
+		elif args.protocol == 'udp':
+			bytes_sent += sock.sendto(payload, (HOST, PORT))
+
+		messages_sent += 1
 
 
-end_time = time()
-time_total = end_time - start_time
-print 'Messages sent {}'.format(messages_sent)
-print 'Sent {} bytes in {} second, which translates to {} kBps rate'.format(bytes_sent, time_total, (bytes_sent/1024)/time_total)
-sock.close();
+	end_time = time()
+	time_total = end_time - start_time
+	print 'Messages sent {}'.format(messages_sent)
+	print 'Sent {} bytes in {} second, which translates to {} kBps rate'.format(bytes_sent, time_total, (bytes_sent/1024)/time_total)
+	sock.close();
+
+if args.unbound:
+	send_unbound(args, sock)
+else:
+	send_with_rate_limit(args, sock)
