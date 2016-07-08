@@ -139,7 +139,7 @@ def send_unbound(args, sock):
 		elif args.protocol == 'udp':
 			sock.sendto(data_point, (HOST, PORT))
 
-		if(time() - start_time > 61): #run for one minute
+		if(time() - start_time > 30): #run for one minute
 			running = False
 
 
