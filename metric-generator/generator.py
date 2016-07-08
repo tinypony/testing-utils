@@ -138,9 +138,9 @@ def send_unbound(args, sock):
 		data_point = 'latency,id={},cluster={},multistack={},direct={},rate={} sentat={}'.format(n, args.cluster_size, args.multistack, args.direct, args.rate, millis)
 		n += 1
 		if args.protocol == 'tcp':
-			bytes_sent += sock.send(payload)
+			sock.send(payload)
 		elif args.protocol == 'udp':
-			bytes_sent += sock.sendto(payload, (HOST, PORT))
+			sock.sendto(payload, (HOST, PORT))
 
 	print 'I am done!'
 	sock.close();
