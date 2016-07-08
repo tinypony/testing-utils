@@ -34,7 +34,7 @@ class ThroughputCalculator {
 			this.endingTime = Date.now();
 		}
 
-		this.totalBytesReceived += dataString.length;
+		this.totalBytesReceived += Buffer.byteLength(dataString, 'utf8');
 	}
 
 	finish() {

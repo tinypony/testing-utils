@@ -49,14 +49,14 @@ var ThroughputCalculator = function () {
 				this.endingTime = Date.now();
 			}
 
-			this.totalBytesReceived += dataString.length;
+			this.totalBytesReceived += Buffer.byteLength(dataString, 'utf8');
 		}
 	}, {
 		key: 'finish',
 		value: function finish() {
 			this.sock.close();
 			var totalTime = this.endingTime - this.startingTime;
-			var totalTimeS = totalTime / 1000;
+			var totalTimeS = totalTime / 1000.0;
 			var bitsReceived = this.totalBytesReceived * 8;
 			var megabitsReceived = bitsReceived / mega;
 			console.log('Received ' + megabitsReceived + ' megabits in ' + totalTimeS + ' seconds. This translates to ' + megabitsReceived / totalTimeS + ' Mbit/s');
