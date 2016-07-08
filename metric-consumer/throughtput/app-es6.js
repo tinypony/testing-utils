@@ -23,16 +23,18 @@ class ThroughputCalculator {
 	}
 
 	update(data) {
+		const dataString = data.toString();
+
 		if(!this.startingTime) {
 			console.log('Start measurements');
-			console.log(data);
+			console.log(dataString);
 			this.startingTime = Date.now();
 			setTimeout(this.finish.bind(this), this.measurePeriod);
 		} else {
 			this.endingTime = Date.now();
 		}
 
-		this.totalBytesReceived += data.length;
+		this.totalBytesReceived += dataString.length;
 	}
 
 	finish() {
