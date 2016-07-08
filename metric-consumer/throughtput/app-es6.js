@@ -14,7 +14,7 @@ class ThroughputCalculator {
 
 	createSocket(port) {
 		const skt = dgram.createSocket('udp4');
-		skt.bind(port, '127.0.0.1');
+		skt.bind(port, '0.0.0.0');
 		skt.on('error', er => {
 			console.log(`[ThroughputCalculator.createSocket()] ${er}`);
 		});

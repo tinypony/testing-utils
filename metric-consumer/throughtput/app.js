@@ -28,7 +28,7 @@ var ThroughputCalculator = function () {
 		key: 'createSocket',
 		value: function createSocket(port) {
 			var skt = _dgram2.default.createSocket('udp4');
-			skt.bind(port, '127.0.0.1');
+			skt.bind(port, '0.0.0.0');
 			skt.on('error', function (er) {
 				console.log('[ThroughputCalculator.createSocket()] ' + er);
 			});
